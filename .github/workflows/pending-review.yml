@@ -1,0 +1,16 @@
+name: Controlled pending deployment fixture
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  gated:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment: review-gate
+    steps:
+      - name: Harmless marker
+        run: echo "alice controlled deployment approval fixture"
