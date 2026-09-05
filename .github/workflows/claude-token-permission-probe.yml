@@ -1,0 +1,37 @@
+name: Claude GitHub App permission probe
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Prepare synthetic Claude CLI
+        run: chmod +x probe-cli.mjs
+
+      - uses: anthropics/claude-code-action@d75b94d5ad426cb8546e6628b6f5f19b84e5cce1
+        with:
+          prompt: "Run the harmless GitHub App permission probe"
+          anthropic_api_key: "synthetic-probe-only"
+          path_to_claude_code_executable: ${{ github.workspace }}/probe-cli.mjs
+          use_commit_signing: true
+          additional_permissions: |
+            actions: write
+            workflows: write
+
+      - name: Print token-free probe result
+        if: always()
+        run: |
+          if test -f "$RUNNER_TEMP/claude-token-permission-probe.json"; then
+            cat "$RUNNER_TEMP/claude-token-permission-probe.json"
+          else
+            echo "Probe result was not produced"
+          fi
